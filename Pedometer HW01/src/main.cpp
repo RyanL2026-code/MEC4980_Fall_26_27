@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include <Arduino.h>              ////// Set up Libraries 
 #include <math.h>
 #include <Adafruit_BNO08x.h>
 #include <AceButton.h>
@@ -15,19 +15,19 @@
 //void setReports();
 #define BNO08X_RESET -1
 
-Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);     
 GFXcanvas16 canvas(240, 135);
 Adafruit_BNO08x bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
 
-enum ScreenState {
+enum ScreenState {      //// Define states/ Menus
 ScreenMain,
 ScreenDistance,
 ScreenAdjstride,
 ScreenRaw,
 SCRENcount
 };
-const char* screen[] = {"ScreenMain", "ScreenDistance", "ScreenAdjstride", "ScreenRaw"};
+const char* screen[] = {"ScreenMain", "ScreenDistance", "ScreenAdjstride", "ScreenRaw"}; 
 ScreenState SCRENmode = ScreenMain;
 float stridelength = 24.0;
 
@@ -41,12 +41,31 @@ volatile bool  menuButtonFlag = false;
 volatile bool  DecreasebuttonFlag = false;
 
 
-float x = 0.0;
+float x = 0.0;          ///// Define global variables 
 float y = 0.0;
 float z = 0.0;
 float alpha = 0.0;
 float beta = 0.0;
-uint16_t stepCount = 0;
+uint32_t stepCount = 0;
+
+void enableStepcounterOnly() {
+  bno08x.enableReport(SH2_ACCELEROMETER,0);
+  bno08x.enableReport(SH2_STEP_COUNTER,10000);
+}
+
+void enableAccelerometerOnly() {
+  bno08x.enableReport(SH2_STEP_COUNTER,0); // Turn off step counter reports
+  bno08x.enableReport(SH2_ACCELEROMETER,10000);  // Ensure accelerometer remains active
+}
+
+
+
+
+
+
+
+
+
 
 void IRAM_ATTR buttonToChangeThings(){
   long now = millis();
@@ -143,16 +162,17 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     // Check which report was updated before reading
     switch (sensorValue.sensorId) {
       case SH2_ACCELEROMETER: {
-        float x = sensorValue.un.accelerometer.x;
-        float y = sensorValue.un.accelerometer.y;
-        float z = sensorValue.un.accelerometer.z;
-        float alpha = atan2(x, sqrt(y*y + z*z)) * RAD_TO_DEG; 
-        float beta = atan2(y, z) * RAD_TO_DEG;
+        x = sensorValue.un.accelerometer.x;
+        y = sensorValue.un.accelerometer.y;
+        z = sensorValue.un.accelerometer.z;
+        alpha = atan2(x, sqrt(y*y + z*z)) * RAD_TO_DEG; 
+        beta = atan2(y, z) * RAD_TO_DEG;
         break;
       }
       case SH2_STEP_COUNTER: {
         Serial.print("Step Counter - steps: ");
         Serial.println(sensorValue.un.stepCounter.steps);
+        stepCount = sensorValue.un.stepCounter.steps;
         break;
       }
     }}
@@ -181,23 +201,28 @@ if(DecreasebuttonFlag){			//// Decrease stride length
 ////////////////////////////////////////////////////////////////////////////////////////
 canvas.setTextColor(ST77XX_BLACK);
 if (SCRENmode == ScreenMain){
+  enableStepcounterOnly();
   canvas.fillScreen(ST77XX_BLUE);
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
-  canvas.print("You are in ");
-  canvas.print(screen[SCRENmode]);canvas.print(" Mode.");
-  canvas.print("Step Counter - steps: ");
- canvas.print(sensorValue.un.stepCounter.steps);
+  canvas.print("This is ");
+  canvas.println(screen[SCRENmode]);canvas.println(" Mode.");
+  canvas.print("Total Steps: ");
+  canvas.print(stepCount);
+
   display.drawRGBBitmap(0,0, canvas.getBuffer(),240,135); 
 }
 
 if (SCRENmode == ScreenDistance){
+  enableStepcounterOnly();
+  float totalDistanceFt = (stepCount * stridelength) / 12.0;
   canvas.fillScreen(ST77XX_GREEN);
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
   canvas.println("You are in ");
   canvas.print(screen[SCRENmode]);  canvas.print(" Mode.");
-  canvas.print("Total Distance Traveled: "); canvas.print("ft");
+
+  canvas.print("Total Distance      Traveled: "); canvas.print(totalDistanceFt);canvas.print("ft");
   display.drawRGBBitmap(0,0, canvas.getBuffer(),240,135); 
 }
 
@@ -206,8 +231,8 @@ if (SCRENmode == ScreenAdjstride){
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
   canvas.println("You are in ");
-  canvas.print(screen[SCRENmode]);canvas.print(" Mode.");
-  canvas.print("The Current Stride Length is:  ");
+  canvas.print(screen[SCRENmode]);canvas.println(" Mode.");
+  canvas.print("The Current Stride:  ");
   canvas.print(stridelength);
   canvas.print("inches");
   
@@ -215,20 +240,21 @@ if (SCRENmode == ScreenAdjstride){
 }
 
 if (SCRENmode == ScreenRaw){
+  enableAccelerometerOnly();
   canvas.fillScreen(ST77XX_ORANGE);
   canvas.setCursor(0,20);
-  canvas.setTextSize(2);
+  canvas.setTextSize(1);
   canvas.println("You are in ");
   canvas.print(screen[SCRENmode]);
-  canvas.print(" Mode.");
+  canvas.println(" Mode.");
 
   
-  canvas.print("Accelerometer - x: ");
-  canvas.print(x);
+  canvas.print(" x: ");
+  canvas.println(x);
   canvas.print(" y: ");
-  canvas.print(y);
+  canvas.println(y);
   canvas.print(" z: ");
-  canvas.print(z);
+  canvas.println(z);
   canvas.print("beta: ");
   canvas.println(beta);
   canvas.print(" alpha: ");
