@@ -48,7 +48,7 @@ float alpha = 0.0;
 float beta = 0.0;
 uint32_t stepCount = 0;
 
-void enableStepcounterOnly() {
+void enableStepcounterOnly() {                        ////// Creating function to isolate sensor functions 
   bno08x.enableReport(SH2_ACCELEROMETER,0);
   bno08x.enableReport(SH2_STEP_COUNTER,10000);
 }
@@ -93,7 +93,7 @@ void IRAM_ATTR buttonToDecrease(){
   }
 }
 
-/////////////// done setting up buttons
+/////////////// done setting up buttons/ intrupts
 
 
 
@@ -125,7 +125,7 @@ pinMode(0, INPUT_PULLUP);
 attachInterrupt(digitalPinToInterrupt(0), buttonToDecrease,RISING);
 
 pinMode(1, INPUT_PULLDOWN);
-attachInterrupt(digitalPinToInterrupt(1), buttonToChangeThings,RISING);
+attachInterrupt(digitalPinToInterrupt(1), buttonToChangeThings,RISING);   
 
 pinMode(2,INPUT_PULLDOWN);
 attachInterrupt(digitalPinToInterrupt(2), buttonToChangeMenu,RISING);
@@ -165,7 +165,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
         x = sensorValue.un.accelerometer.x;
         y = sensorValue.un.accelerometer.y;
         z = sensorValue.un.accelerometer.z;
-        alpha = atan2(x, sqrt(y*y + z*z)) * RAD_TO_DEG; 
+        alpha = atan2(x, sqrt(y*y + z*z)) * RAD_TO_DEG; /// Get information from sensor and update the correct case information 
         beta = atan2(y, z) * RAD_TO_DEG;
         break;
       }
@@ -202,7 +202,7 @@ if(DecreasebuttonFlag){			//// Decrease stride length
 canvas.setTextColor(ST77XX_BLACK);
 if (SCRENmode == ScreenMain){
   enableStepcounterOnly();
-  canvas.fillScreen(ST77XX_BLUE);
+  canvas.fillScreen(ST77XX_BLUE);           // Step count only, main screen that shows steps taken
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
   canvas.print("This is ");
@@ -215,8 +215,8 @@ if (SCRENmode == ScreenMain){
 
 if (SCRENmode == ScreenDistance){
   enableStepcounterOnly();
-  float totalDistanceFt = (stepCount * stridelength) / 12.0;
-  canvas.fillScreen(ST77XX_GREEN);
+  float totalDistanceFt = (stepCount * stridelength) / 12.0;   // Calculates distance based on steps and stride length 
+  canvas.fillScreen(ST77XX_GREEN);            
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
   canvas.println("You are in ");
@@ -230,7 +230,7 @@ if (SCRENmode == ScreenAdjstride){
   canvas.fillScreen(ST77XX_YELLOW);
   canvas.setCursor(0,20);
   canvas.setTextSize(2);
-  canvas.println("You are in ");
+  canvas.println("You are in ");                                /// Allows user to adjust stride length with a increase and decrease button 
   canvas.print(screen[SCRENmode]);canvas.println(" Mode.");
   canvas.print("The Current Stride:  ");
   canvas.print(stridelength);
@@ -249,7 +249,7 @@ if (SCRENmode == ScreenRaw){
   canvas.println(" Mode.");
 
   
-  canvas.print(" x: ");
+  canvas.print(" x: ");                 /// Displays all the acclerometer information 
   canvas.println(x);
   canvas.print(" y: ");
   canvas.println(y);
