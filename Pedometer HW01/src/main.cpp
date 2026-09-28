@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_Sensor.h>
+#include <Adafruit_Sensor.h>         ////// VIDEO OF WORKING CODE PROVIDED OVER EMAIL, SENT 9/28 @ 9:05am/////////
 #include <Adafruit_ST7789.h>                   
 #include <Adafruit_seesaw.h>
 #include <time.h> 
