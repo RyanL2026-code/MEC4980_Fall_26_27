@@ -5,7 +5,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>         
-#include <Adafruit_ST7789.h>                   /// Reference all the needed libraries 
+#include <Adafruit_ST7789.h>                   /// Reference all the needed libraries, Working code video shared over Email 9/30 @ 9:20 pm
 #include <Adafruit_seesaw.h>
 using namespace ace_button;
 
