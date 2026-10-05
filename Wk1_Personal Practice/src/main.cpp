@@ -1,4 +1,4 @@
-#include <Arduino.h>
+/*#include <Arduino.h>
 #include <Adafruit_ST7789.h>
 #include <Adafruit_seesaw.h>
 #include <time.h> 
