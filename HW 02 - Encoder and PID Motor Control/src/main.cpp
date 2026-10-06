@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <PID_v1.h>
 
-const int PIN1 = 9;
+const int PIN1 = 9;  //// Set up libraries and pins 
 const int PIN2 = 10;
 const int PWM_FREQ = 20000;
 const int PWM_BITS = 8;
 
-
+// Please see sent over Videos and text file of HW
 
 //////////////////////////////////////////// PID STUFF
 /********************************************************
@@ -23,8 +23,8 @@ const int PWM_BITS = 8;
 double Setpoint, Input, SupplyV;
 
 //Specify the links and initial tuning parameters
-double Kp=2, Ki=0, Kd=0;
-PID myPID(&Input, &SupplyV, &Setpoint, Kp, Ki, Kd, DIRECT);
+double Kp=0.8, Ki=0.2, Kd=0.05;
+PID myPID(&Input, &SupplyV, &Setpoint, Kp, Ki, Kd, DIRECT);//Direct
 
 
 ///////////////////////////////////////////////////////////////
@@ -35,11 +35,11 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(10);
-
+analogWrite(PIN_OUTPUT, 150);
 
      //initialize the variables we're linked to
   //Input = analogRead(PIN_INPUT);
-  Setpoint = 70;
+  Setpoint = 75;
 
   //turn the PID on
   myPID.SetOutputLimits(0, 255);
@@ -47,14 +47,14 @@ void setup() {
 }
 
 float fullcycle;
-float DesiredRpm = 5;
+//float DesiredRpm = 5;
 //float SupplyV = 50;
 float lightlevel;
-float dark = 700;
+float dark = 700;  // light activation level 
 float RPM;
 
 enum Lightcount {
-  FirstCount,
+  FirstCount,          // Enumerations for counting the rotation slit wheel, Time between two slits is 1 rotation
   SecondCount,
   Lcount
 };
@@ -76,7 +76,7 @@ const unsigned long MIN_STEP_INTERVAL = 100; // Minimum required delay between s
 
 
 
-void startTimer() {
+void startTimer() {    // Creation of timer function for timing inbetween slit counts 
   startTime = millis();
   timerRunning = true;
   //Serial.println("Timer Started");
@@ -101,9 +101,9 @@ void loop() {
   
   unsigned long currentMillis = millis();
 
-  // Step 1: Detect light, start timer, wait for transition
+  // Step 1: Detect light, start timer, wait for transition, First light hit 
   if ((lightlevel > dark) && (countswitch == FirstCount) && fresh) {
-    if (currentMillis - lastStepTime >= MIN_STEP_INTERVAL) {
+    if (currentMillis - lastStepTime >= MIN_STEP_INTERVAL) {        /// This is a form of time delay without using the DELAY() function
       startTimer();
       countswitch = (Lightcount)((countswitch + 1) % Lightcount::Lcount);
       fresh = false;
@@ -112,7 +112,7 @@ void loop() {
     }
   }
 
-  // Step 2: Detect dark transition
+  // Step 2: Detect dark transition,  wheel rotation continues 
   if ((lightlevel < dark) && (countswitch == SecondCount) && !fresh) {
     if (currentMillis - lastStepTime >= MIN_STEP_INTERVAL) {
       fresh = true;
@@ -121,7 +121,7 @@ void loop() {
     }
   }
 
-  // Step 3: Detect light transition again, calculate RPM
+  // Step 3: Detect light transition again, calculate RPM, the slit comes back around and counts as one revolution 
   if ((lightlevel > dark) && (countswitch == SecondCount) && fresh) {
     if (currentMillis - lastStepTime >= MIN_STEP_INTERVAL) {
       //Serial.println(" step 3");
@@ -140,15 +140,17 @@ void loop() {
       //Serial.println(fullcycle);
       //Serial.print("The RPM: ");
       Serial.println(RPM);
-      Input = RPM;
+      Input = RPM;             // The input to the PID is RPM and the output is SupplyV
       //myPID.Compute();
-      //analogWrite(PIN_OUTPUT, SupplyV);
+      analogWrite(PIN_OUTPUT, SupplyV);
+      Serial.print("This is the supplyV:");Serial.println(SupplyV);
+
       resetTimer();
     }
   }
 
 // Step 2: Detect dark transition
-  if ((lightlevel < dark) && (countswitch == FirstCount) && !fresh) {
+  if ((lightlevel < dark) && (countswitch == FirstCount) && !fresh) {      // Resets back to start
     if (currentMillis - lastStepTime >= MIN_STEP_INTERVAL) {
       fresh = true;
       lastStepTime = currentMillis; // Record time step occurred
@@ -156,9 +158,9 @@ void loop() {
     }
   }
 
-
-  myPID.Compute();
-  analogWrite(PIN_OUTPUT, SupplyV);
+  myPID.Compute(); // Computes a desired valve every cycle 
+  //myPID.Compute();
+  //analogWrite(PIN_OUTPUT, SupplyV);
 
 }
 
