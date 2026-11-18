@@ -16,7 +16,7 @@ void setup() {
   delay(2000);
   
   pinMode(0, INPUT_PULLUP);
-  pinMode(1, INPUT_PULLDOWN);
+  pinMode(9, INPUT_PULLDOWN);
   pinMode(2, INPUT_PULLDOWN);
 
   newTimerFn.start();
@@ -33,7 +33,7 @@ void loop() {
 
 void myFunction() {
   printSentence = "D0, D1, D2, A0: ";
-  printSentence += (String(digitalRead(0)) + ", " + String(digitalRead(1)) + " , " + String(digitalRead(2)));
+  printSentence += (String(digitalRead(0)) + ", " + String(digitalRead(9)) + " , " + String(digitalRead(2)));
   printSentence += " , " + String(millis()); 
   isSentenceComplete = true;
 } 
