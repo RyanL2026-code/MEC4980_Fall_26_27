@@ -7,8 +7,8 @@
 #include <time.h>
 
 // Enter your Wi-Fi credentials and the coordinates of the desired weather location.
-constexpr char wifiSsid[] = "------------";
-constexpr char wifiPassword[] = "-----------";
+constexpr char wifiSsid[] = "-----";
+constexpr char wifiPassword[] = "-------";
 constexpr char locationName[] = "SG-32, Science Building, MSOE, Milwaukee, WI";
 constexpr char latitude[] = "43.04302803179632";
 constexpr char longitude[] = "-87.90678040825065";
@@ -40,6 +40,9 @@ constexpr char page[] PROGMEM = R"html(
 
     <p id="Green">Press the button to set the Neopixel to Green.</p>
   <button id="GreenButton" onclick="update('/Green', 'Green', this)">Update Color to Green</button>
+
+  <p id="OFF">Press the button to set turn the Neopixel off.</p>
+  <button id="OFFButton" onclick="update('/OFF', 'OFF', this)">Turn OFF</button>
 
   <script>
     async function update(url, id, button) {
@@ -168,6 +171,9 @@ void setup() {
     server.send(200, "text/plain; charset=utf-8", "NeoPixel set to Blue");});
     server.on("/Green", HTTP_GET, []() { neopixelWrite(PIN_NEOPIXEL,0,64,0); 
     server.send(200, "text/plain; charset=utf-8", "NeoPixel set to Green");});
+
+    server.on("/OFF", HTTP_GET, []() { neopixelWrite(PIN_NEOPIXEL,0,0,0); 
+    server.send(200, "text/plain; charset=utf-8", "NeoPixel set to OFF");});
 
 
 
